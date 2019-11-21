@@ -5,11 +5,13 @@ import StudentController from "./app/controllers/StudentController";
 import PlanController from "./app/controllers/PlanController";
 import authMidd from "./app/middlewares/auth";
 import EnrollmentController from "./app/controllers/EnrollmentController";
+import CheckinController from "./app/controllers/CheckinController";
 
 const routes = Router();
 
 routes.post("/users", UserController.store);
 routes.post("/sessions", SessionController.store);
+routes.post("/student/:id/checkin", CheckinController.store);
 routes.use(authMidd);
 routes.post("/student", StudentController.store);
 routes.put("/student/:id", StudentController.update);
