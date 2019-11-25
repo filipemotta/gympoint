@@ -1,5 +1,8 @@
 import Student from "../models/Student";
 import HelpOrder from "../models/HelpOrder";
+import { format } from "date-fns";
+import Mail from "../../lib/Mail";
+import pt from "date-fns/locale";
 
 class HelpOrderController {
   async store(req, res) {
@@ -8,13 +11,47 @@ class HelpOrderController {
     if (!student) {
       return res.status(400).json({ error: "Student does not exist" });
     }
-    console.log(req.params.id);
+
     const help_order = await HelpOrder.create({
       student_id: req.params.id,
       question: question
     });
 
     return res.json(help_order);
+  }
+
+  async update(req, res) {
+    const helpOrder = await HelpOrder.findByPk(req.params.id, {
+      include: [
+        {
+          model: Student,
+          as: "student",
+          attributes: ["name", "email"]
+        }
+      ]
+    });
+    const { answer } = req.body;
+
+    const helpAnswer = await helpOrder.update({
+      answer: answer,
+      answer_at: new Date()
+    });
+
+    await Mail.sendMail({
+      to: `${helpOrder.student.name} <${helpOrder.student.email}>`,
+      subject: `Sua pergunta foi respondida ${helpOrder.student.name}`,
+      template: "answer",
+      context: {
+        student: helpOrder.student.name,
+        question: helpOrder.question,
+        answer: answer,
+        date: format(helpAnswer.answer_at, "dd 'de' MMMM 'as' H:mm'h'", {
+          locale: pt
+        })
+      }
+    });
+
+    return res.json(helpAnswer);
   }
 
   async index(req, res) {

@@ -16,6 +16,7 @@ routes.post("/student/:id/checkin", CheckinController.store);
 routes.get("/student/:id/checkin", CheckinController.index);
 routes.post("/student/:id/help-order", HelpOrderController.store);
 routes.get("/student/:id/help-order", HelpOrderController.index);
+routes.post("/help-order/:id/answer", HelpOrderController.update);
 routes.use(authMidd);
 routes.post("/student", StudentController.store);
 routes.put("/student/:id", StudentController.update);

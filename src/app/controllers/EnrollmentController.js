@@ -2,7 +2,9 @@ import Student from "../models/Student";
 import Plan from "../models/Plan";
 import User from "../models/User";
 import Enrollment from "../models/Enrollment";
-import { parseISO, addMonths } from "date-fns";
+import { parseISO, addMonths, format } from "date-fns";
+import Mail from "../../lib/Mail";
+import pt from "date-fns/locale";
 
 class EnrollmentController {
   async index(req, res) {
@@ -63,6 +65,22 @@ class EnrollmentController {
     const start = parseISO(start_date);
     const end = addMonths(start, plan.duration);
     const total = plan.price * plan.duration;
+
+    await Mail.sendMail({
+      to: `${student.name} <${student.email}>`,
+      subject: `Bem vindo a Gympoint ${student.name}`,
+      template: "subscription",
+      context: {
+        student: student.name,
+        plan: plan.title,
+        value: total,
+        start_date: start,
+        end_date: end,
+        date: format(start, "dd 'de' MMMM 'as' H:mm'h'", {
+          locale: pt
+        })
+      }
+    });
 
     const enrollment = await Enrollment.create({
       student_id: student.id,
